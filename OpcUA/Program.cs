@@ -17,7 +17,7 @@ namespace OpcUA {
 
         static void Main(string[] args) {
             InitDictVariables();
-            OpcUaReader opcUaReader = OpcUaReader.Create(ConnectionString, ApplicationName).WithRefrencesToMap(DictVariables);
+            OpcUaReader opcUaReader = OpcUaReader.Create(ConnectionString, ApplicationName).WithRefrencesToMap(DictVariables).WithSubscription();
             Console.WriteLine("Going to read some variables");
             Console.WriteLine("-----------------------------");
 
@@ -30,7 +30,10 @@ namespace OpcUA {
             Console.WriteLine("-----------------------------");
             Console.WriteLine($"Elapsed time: {stopwatch.ElapsedMilliseconds} (ms)");
 
-            Console.WriteLine("Press any key to continue...");
+            Console.WriteLine();
+            Console.WriteLine("Starting subscription...");
+            Console.WriteLine("Press any key to exit...");
+            opcUaReader.CreateAndStartSubscription();
             Console.ReadKey(true);
         }
 

@@ -18,6 +18,7 @@ namespace OpcUA {
         public ApplicationInstance Application { get; private set; }
         public Dictionary<string, Type> ReferencesToMap { get; private set; }
         public ReferenceDescriptionCollection MappedReferences { get; private set; }
+        public Subscription Subscription { get; private set; }
 
         private OpcUaReader(string connectionString, string applicationName) {
             if (connectionString.IsNullOrEmpty()) throw new ArgumentNullException("connectionString", "connectionString is null or empty.");
@@ -90,10 +91,33 @@ namespace OpcUA {
             }
         }
 
+        private void SetSubsription() {
+            List<MonitoredItem> monitoredItems = new List<MonitoredItem>();
+            monitoredItems.AddRange(
+                MappedReferences.Select(
+                x => new MonitoredItem(Subscription.DefaultItem) { DisplayName = x.DisplayName.Text, StartNodeId = ExpandedNodeId.ToNodeId(x.NodeId, Session.NamespaceUris) }
+                )
+            );
+            monitoredItems.ForEach(x => x.Notification += OnNotification);
+            Subscription.AddItems(monitoredItems);
+        }
+
+        private static void OnNotification(MonitoredItem item, MonitoredItemNotificationEventArgs e) {
+            Console.WriteLine("-----------------------------");
+            foreach (DataValue value in item.DequeueValues()) {
+                Console.WriteLine($"{value.ServerTimestamp} - {item.DisplayName}: {value.Value}");
+            }
+        }
+
         public static OpcUaReader Create(string connectionString, string applicationName) { return new OpcUaReader(connectionString, applicationName); }
         public OpcUaReader WithRefrencesToMap(Dictionary<string, Type> referencesToMap) {
             ReferencesToMap = referencesToMap;
             MapReferencesToMap();
+            return this;
+        }
+        public OpcUaReader WithSubscription(int publishingInterval = 1000) {
+            Subscription = new Subscription(Session.DefaultSubscription) { PublishingInterval = 1000 };
+            SetSubsription();
             return this;
         }
 
@@ -110,6 +134,11 @@ namespace OpcUA {
                 }
             }
             return objOut;
+        }
+
+        public void CreateAndStartSubscription() {
+            Session.AddSubscription(Subscription);
+            Subscription.Create();
         }
 
     }
