@@ -68,7 +68,7 @@ namespace OpcUA {
                 Console.WriteLine($"Nodes mapped: {References.Count}");
 
                 foreach (ReferenceDescription rd in References) {
-                    Console.WriteLine($"\tns={rd.NodeId.NamespaceIndex}; i={rd.NodeId.Identifier}: {rd.DisplayName.Text}");
+                    Console.WriteLine($"\tns={rd.NodeId.NamespaceIndex}; i={rd.NodeId.Identifier}; DisplayName={rd.DisplayName.Text}: Value={GetVariableValue(rd, session)}");
                 }
 
                 Console.WriteLine("Press any key to continue...");
@@ -94,6 +94,18 @@ namespace OpcUA {
 
                 BrowseNodes(session, rd, level + 1);
             }
+        }
+
+        private static object GetVariableValue(ReferenceDescription rd, Session session) {
+            object objOut = null;
+            if (rd != null && rd.NodeId != null) {
+                NodeId n = ExpandedNodeId.ToNodeId(rd.NodeId, session.NamespaceUris);
+                DataValue dv = session.ReadValue(n);
+                if (dv != null) {
+                    objOut = dv.GetValue(DictVariables[rd.DisplayName.Text]);
+                }
+            }
+            return objOut;
         }
 
         private static void InitVariablesDictionary() {
