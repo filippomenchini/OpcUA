@@ -10,3 +10,4 @@ Developed with OPCFoundation.NetStandard.Opc.Ua NuGet package on .NET Framework 
   
 ## Notes
 Code is really basic stuff. Going to add some strucuture and functionality in the future.
+Feel free to fork this or to send a pull request.
