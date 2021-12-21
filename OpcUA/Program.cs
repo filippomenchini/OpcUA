@@ -19,10 +19,9 @@ namespace OpcUA {
         private static ReferenceDescriptionCollection References { get; set; }
 
         static void Main(string[] args) {
-            Console.WriteLine("Step 1 - Create application configuration and certificate.");
             ApplicationConfiguration config = new ApplicationConfiguration() {
                 ApplicationName = ApplicationName,
-                ApplicationUri = Utils.Format(@"urn:{0}:MyHomework", System.Net.Dns.GetHostName()),
+                ApplicationUri = Utils.Format(@"urn:{0}:{1}", System.Net.Dns.GetHostName(), ApplicationName),
                 ApplicationType = ApplicationType.Client,
                 SecurityConfiguration = new SecurityConfiguration {
                     ApplicationCertificate = new CertificateIdentifier { StoreType = @"Directory", StorePath = @"%CommonApplicationData%\OPC Foundation\CertificateStores\MachineDefault", SubjectName = ApplicationName },
@@ -50,12 +49,12 @@ namespace OpcUA {
 
             EndpointDescription selectedEndpoint = CoreClientUtils.SelectEndpoint(ConnectionString, false, 15000);
 
-            Console.WriteLine($"Step 2 - Create a session with your server: {selectedEndpoint.EndpointUrl} ");
+            Console.WriteLine($"Step 1 - Create a session with your server: {selectedEndpoint.EndpointUrl} ");
             using (Session session = Session.Create(config, new ConfiguredEndpoint(null, selectedEndpoint, EndpointConfiguration.Create(config)), false, "", 60000, null, null).GetAwaiter().GetResult()) {
-                Console.WriteLine("Step 3 - Init DictVariables.");
+                Console.WriteLine("Step 2 - Init DictVariables.");
                 InitVariablesDictionary();
 
-                Console.WriteLine("Step 4 - Browse the server namespace and map nodes in DictVariables.");
+                Console.WriteLine("Step 3 - Browse the server namespace and map nodes in DictVariables.");
                 Console.WriteLine("DisplayName: BrowseName, NodeClass");
 
                 Stopwatch stopWatch = Stopwatch.StartNew();
